@@ -11,6 +11,9 @@ pytest = "*"
 pytest-django = "*"
 black = "*"
 django-environ = "*"
+drf-spectacular = "*"
+django-allauth = "*"
+django-rest-auth = "*"
 
 [dev-packages]
 
