@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "==3.2"
+djangorestframework = "*"
+django-filter = "*"
+pytest = "*"
+pytest-django = "*"
+black = "*"
+django-environ = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true
