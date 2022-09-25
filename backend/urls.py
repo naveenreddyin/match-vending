@@ -30,6 +30,7 @@ urlpatterns = [
     path("rest-auth/registration/", include("rest_auth.registration.urls")),
     path("", include("users.api.v1.urls", namespace="users")),
     path("", include("products.api.v1.urls", namespace="products")),
+    path("", include("orders.api.v1.urls", namespace="orders")),
 ]
 
 

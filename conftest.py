@@ -69,18 +69,50 @@ def get_buyer_user_token_and_client(db, create_user, api_client):
 
 
 @pytest.fixture
-def get_product(db, create_user):
+def get_buyer_user_product_and_client(
+    db,
+    create_user,
+    api_client,
+):
+    def _method(
+        amount=10,
+        cost=10,
+        deposit=100,
+    ):
+        user = create_user()
+        profile = user.user_profile
+        profile.is_buyer = True
+        profile.deposit = deposit
+        profile.save()
+        token, _ = Token.objects.get_or_create(user=user)
+        api_client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        # create product
+        proxy_product = ProductFactory.build()
+        product = Product.objects.create(
+            name=proxy_product.name,
+            amount=amount,
+            cost=cost,
+            seller=user,
+        )
+        return user, product, api_client
+
+    return _method
+
+
+@pytest.fixture
+def get_product(db, create_user, amount=10, cost=10, deposit=100):
     # process user
     user = create_user()
     profile = user.user_profile
     profile.is_seller = True
+    profile.deposit = deposit
     profile.save()
     # create product
     proxy_product = ProductFactory.build()
     product = Product.objects.create(
         name=proxy_product.name,
-        amount=10,
-        cost=10,
+        amount=amount,
+        cost=cost,
         seller=user,
     )
     return product
