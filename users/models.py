@@ -23,18 +23,30 @@ class User(AbstractUser):
 
 
 class Profile(BaseModel):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="user_profile",
+    )
+    is_buyer = models.BooleanField(
+        default=False,
+        blank=True,
+        null=True,
+    )
+    is_seller = models.BooleanField(
+        default=False,
+        blank=True,
+        null=True,
+    )
+    deposit = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        default=0,
     )
 
     class Meta:
         verbose_name = "Profile"
         verbose_name_plural = "Profiles"
-
-    def __unicode__(self):
-        return f"{self.user}"
 
     def __str__(self) -> str:
         return f"{self.user}"

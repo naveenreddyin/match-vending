@@ -14,6 +14,7 @@ django-environ = "*"
 drf-spectacular = "*"
 django-allauth = "*"
 django-rest-auth = "*"
+factory-boy = "*"
 
 [dev-packages]
 

@@ -177,3 +177,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 25,
 }
+
+REST_AUTH_REGISTER_SERIALIZERS = {
+    # Use custom serializer that has no username and matches web signup
+    "REGISTER_SERIALIZER": "users.api.v1.serializers.SignupSerializer",
+}
