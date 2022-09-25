@@ -221,3 +221,32 @@ def test_user_deposit_validation_with_right_data(
     # check user
     user = django_user_model.objects.get(pk=1)
     assert user.user_profile.deposit == 5
+
+
+def test_if_reset_deposit_exists(get_any_user_token_and_client):
+    _, api_client = get_any_user_token_and_client
+
+    response = api_client.patch("/users/reset/1/")
+    # as user is not authenticated it will give 403
+    assert response.status_code == 403
+
+
+def test_if_reset_deposit_give_404_if_user_not_found(get_buyer_user_product_and_client):
+    _, _, api_client = get_buyer_user_product_and_client()
+
+    response = api_client.patch("/users/reset/2/")
+    # as user is not authenticated it will give 404
+    assert response.status_code == 404
+
+
+def test_if_reset_deposit_is_success(get_buyer_user_product_and_client):
+    user, _, api_client = get_buyer_user_product_and_client(deposit=50)
+
+    assert user.user_profile.deposit == 50
+
+    response = api_client.patch(f"/users/reset/{user.id}/")
+    # as user is not authenticated it will give 404
+    assert response.status_code == 200
+
+    user.refresh_from_db()
+    assert user.user_profile.deposit == 0

@@ -13,6 +13,25 @@ from users.api.v1.permissions import IsBuyer
 User = get_user_model()
 
 
+class ResetDepositViewSet(viewsets.ViewSet):
+    permission_classes = [IsBuyer]
+    permission_classes_per_method = {
+        # except for list and retrieve where both users with "write" or "read-only"
+        # permissions can access the endpoints.
+        "partial_update": [IsBuyer],
+    }
+
+    def partial_update(self, request, pk=None):
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise exceptions.NotFound("user not found.")
+        profile = user.user_profile
+        profile.deposit = 0
+        profile.save()
+        return Response({"status": "deposit reset done"}, status=status.HTTP_200_OK)
+
+
 class DepositViewSet(viewsets.ViewSet):
     permission_classes = [IsBuyer]
     permission_classes_per_method = {

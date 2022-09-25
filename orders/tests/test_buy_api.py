@@ -58,6 +58,23 @@ def test_buyer_role_can_post_but_right_data(get_buyer_user_product_and_client):
     assert user.user_profile.deposit == 0
 
 
+def test_buyer_get_right_response_when_data_right(get_buyer_user_product_and_client):
+    user, product, client = get_buyer_user_product_and_client()
+
+    assert user.user_profile.deposit == 100
+
+    response = client.post(
+        "/buy/",
+        {
+            "product": product.id,
+            "amount": 10,
+        },
+    )
+    assert response.status_code == 201
+    assert "product" in response.data
+    assert "balance" in response.data
+
+
 def test_buyer_cant_buy_if_no_or_low_balance(get_buyer_user_product_and_client):
     _, product, client = get_buyer_user_product_and_client(deposit=5)
     response = client.post(

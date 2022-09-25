@@ -7,6 +7,7 @@ from drf_spectacular.utils import (
 )
 
 from products.api.v1.permissions import PermissionPolicyMixin
+from products.api.v1.serializers import ProductSerializer
 from orders.api.v1.serializers import BuySerializer
 from users.api.v1.permissions import IsBuyer
 from products.models import Product
@@ -24,7 +25,15 @@ class BuyViewSet(viewsets.ViewSet):
 
     @extend_schema(
         request=BuySerializer,
-        responses=BuySerializer,
+        responses={
+            "product": {
+                "amount": 1,
+                "cost": 1,
+                "id": 1,
+                "name": "SDfds",
+                "seller": 1,
+            }
+        },
     )
     def create(self, request):
         user = request.user
@@ -37,7 +46,6 @@ class BuyViewSet(viewsets.ViewSet):
             except Product.DoesNotExist:
                 raise exceptions.NotFound("Product not found")
             # check stock
-            print("amount ", serializer.validated_data)
             amount_needed = product.amount - desired_amount
             if amount_needed < 0:
                 raise exceptions.ValidationError(
@@ -63,9 +71,8 @@ class BuyViewSet(viewsets.ViewSet):
 
             return Response(
                 {
-                    "status": {
-                        "product": product.name,
-                    }
+                    "product": ProductSerializer(product).data,
+                    "balance": user.user_profile.deposit,
                 },
                 status=status.HTTP_201_CREATED,
             )
