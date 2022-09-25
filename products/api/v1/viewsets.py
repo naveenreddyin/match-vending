@@ -20,6 +20,7 @@ class ProductViewSet(PermissionPolicyMixin, viewsets.ModelViewSet):
         "create": [IsSeller],
         "list": [IsAuthenticated],
         "update": [IsSellerAndOwner],
+        "destroy": [IsSellerAndOwner],
     }
     http_method_names = [
         "get",

@@ -6,10 +6,20 @@ from users.models import Profile
 User = get_user_model()
 
 
-class UserLoginDataSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = "__all__"
+class DepositSerializer(serializers.Serializer):
+    deposit = serializers.IntegerField()
+
+    def validate_deposit(self, value):
+        """
+        check for multiple of 5 or not else raise exception
+        """
+        if value % 5 != 0:
+            raise serializers.ValidationError("deposit is not multiple of 5")
+        elif value not in [5, 10, 20, 50, 100]:
+            raise serializers.ValidationError(
+                "The deposit amount has to be one of 5, 10, 20, 50, or 100 cent coins"
+            )
+        return value
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -21,7 +31,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 class SignupSerializer(serializers.ModelSerializer):
     is_buyer = serializers.BooleanField(write_only=True, default=False)
     is_seller = serializers.BooleanField(write_only=True, default=False)
-    deposit = serializers.IntegerField(write_only=True, default=0)
+    deposit = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = User
@@ -43,6 +53,10 @@ class SignupSerializer(serializers.ModelSerializer):
         """
         if value % 5 != 0:
             raise serializers.ValidationError("deposit is not multiple of 5")
+        elif value not in [5, 10, 20, 50, 100]:
+            raise serializers.ValidationError(
+                "The deposit amount has to be one of 5, 10, 20, 50, or 100 cent coins"
+            )
         return value
 
     def create(self, validated_data):

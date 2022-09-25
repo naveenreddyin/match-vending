@@ -57,6 +57,18 @@ def get_seller_user_token_and_client(db, create_user, api_client):
 
 
 @pytest.fixture
+def get_buyer_user_token_and_client(db, create_user, api_client):
+
+    user = create_user()
+    profile = user.user_profile
+    profile.is_buyer = True
+    profile.save()
+    token, _ = Token.objects.get_or_create(user=user)
+    api_client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+    return token, api_client
+
+
+@pytest.fixture
 def get_product(db, create_user):
     # process user
     user = create_user()

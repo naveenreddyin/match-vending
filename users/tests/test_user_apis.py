@@ -1,3 +1,4 @@
+from urllib import response
 import pytest
 
 from users.models import Profile
@@ -98,7 +99,7 @@ def test_to_see_if_profile_defaults_set_when_data_not_sent(
     # assert that is_buyer and is_seller is set to false and deposit is zero
     assert profile.is_buyer == False
     assert profile.is_seller == False
-    assert profile.deposit == 0
+    assert profile.deposit == None
 
 
 def test_when_profile_fields_are_set(api_client, django_user_model):
@@ -138,3 +139,86 @@ def test_deposit_validation(api_client):
     # should give 400 as deposit value is not a multiple of 5
     assert response.status_code == 400
     assert response.data == {"deposit": ["deposit is not multiple of 5"]}
+
+
+def test_user_deposit_endpoint_get_method(api_client):
+    response = api_client.get("/users/deposits/")
+    # should give 404 as it should only be patch
+    assert response.status_code == 404
+
+
+def test_user_deposit_endpoint_post_method(api_client):
+    response = api_client.post("/users/deposits/")
+    # should give 404 as it should only be patch
+    assert response.status_code == 404
+
+
+def test_user_deposit_endpoint_put_method(api_client):
+    response = api_client.put("/users/deposits/")
+    # should give 404 as it should only be patch
+    assert response.status_code == 404
+
+
+def test_user_deposit_endpoint_delete_method(api_client):
+    response = api_client.delete("/users/deposits/")
+    # should give 404 as it should only be patch
+    assert response.status_code == 404
+
+
+def test_user_deposit_endpoint_patch_method_with_any_role(
+    get_any_user_token_and_client,
+):
+    _, api_client = get_any_user_token_and_client
+    response = api_client.patch(
+        "/users/deposits/1/",
+        {
+            "deposit": 10,
+        },
+        format="json",
+    )
+    # should give 403 as it should only be is_buyer role
+    assert response.status_code == 403
+
+
+def test_user_deposit_with_buyer_role(get_buyer_user_token_and_client):
+    _, api_client = get_buyer_user_token_and_client
+    response = api_client.patch(
+        "/users/deposits/1/",
+        {
+            "deposit": 5,
+        },
+        format="json",
+    )
+    # should give 200 as it should only be is_buyer role
+    assert response.status_code == 200
+
+
+def test_user_deposit_validation_with_wrong_data(get_buyer_user_token_and_client):
+    _, api_client = get_buyer_user_token_and_client
+    response = api_client.patch(
+        "/users/deposits/1/",
+        {
+            "deposit": 1,
+        },
+        format="json",
+    )
+    # should give 400 as it deposit amount is wrong
+    assert response.status_code == 400
+
+
+def test_user_deposit_validation_with_right_data(
+    get_buyer_user_token_and_client, django_user_model
+):
+    _, api_client = get_buyer_user_token_and_client
+    response = api_client.patch(
+        "/users/deposits/1/",
+        {
+            "deposit": 5,
+        },
+        format="json",
+    )
+    # should give 200 as it deposit amount is wrong
+    assert response.status_code == 200
+    # check user
+    user = django_user_model.objects.get(pk=1)
+    assert user.user_profile.deposit == 5
