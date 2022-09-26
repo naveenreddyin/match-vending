@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth import logout
 
 from rest_framework import viewsets, status, exceptions
 from rest_framework.response import Response
@@ -11,6 +12,14 @@ from users.api.v1.serializers import DepositSerializer
 from users.api.v1.permissions import IsBuyer
 
 User = get_user_model()
+
+
+class LogoutViewSet(viewsets.ViewSet):
+    def create(self, request):
+        logout(request)
+        return Response(
+            {"status": "Logged out from everywhere."}, status=status.HTTP_200_OK
+        )
 
 
 class ResetDepositViewSet(viewsets.ViewSet):

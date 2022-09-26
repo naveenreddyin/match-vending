@@ -28,6 +28,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ["is_buyer", "is_seller"]
 
 
+# class LoginSerializer(serializers.Serializer):
+#     username = serializers.CharField()
+#     password = serializers.CharField()
+
+
 class SignupSerializer(serializers.ModelSerializer):
     is_buyer = serializers.BooleanField(write_only=True, default=False)
     is_seller = serializers.BooleanField(write_only=True, default=False)

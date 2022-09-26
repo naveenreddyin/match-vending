@@ -250,3 +250,86 @@ def test_if_reset_deposit_is_success(get_buyer_user_product_and_client):
 
     user.refresh_from_db()
     assert user.user_profile.deposit == 0
+
+
+def test_multiple_login_not_allowed(api_client, django_user_model):
+    # create user
+    django_user_model.objects.create_user(
+        username="dummy1@dispostable.com",
+        password="testuser1234_",
+    )
+    response = api_client.post(
+        "/rest-auth/login/",
+        {
+            "username": "dummy1@dispostable.com",
+            "password": "testuser1234_",
+        },
+        format="json",
+    )
+    assert response.status_code == 200
+    # try again and should give 403
+    response = api_client.post(
+        "/rest-auth/login/",
+        {
+            "username": "dummy1@dispostable.com",
+            "password": "testuser1234_",
+        },
+        format="json",
+    )
+    assert response.status_code == 403
+    assert response.data == {
+        "detail": "There is already an active session using your account. Logout all sessions by going to /logout/all uri."
+    }
+
+
+def test_if_logout_all_endpoint_exists(api_client):
+    response = api_client.post("/users/logout/all/")
+    # as not logged in should give 401
+    assert response.status_code == 401
+
+
+def test_logout_all_endpoint_after_two_logins(api_client, django_user_model):
+    """
+    Assuming that we have to replicate logout all scenario,
+    we have to login the users twice so that we get multiple sessions error,
+    and then call, logout/all endpoint as without logging in one cant access
+    that endpoint.
+    """
+    # create user
+    django_user_model.objects.create_user(
+        username="dummy1@dispostable.com",
+        password="testuser1234_",
+    )
+    # first login, should be ok
+    response = api_client.post(
+        "/rest-auth/login/",
+        {
+            "username": "dummy1@dispostable.com",
+            "password": "testuser1234_",
+        },
+        format="json",
+    )
+    assert response.status_code == 200
+    # second login and should fail, meaning user already logged in.
+    response = api_client.post(
+        "/rest-auth/login/",
+        {
+            "username": "dummy1@dispostable.com",
+            "password": "testuser1234_",
+        },
+        format="json",
+    )
+    assert response.status_code == 403
+    # now call logout all, should give 200
+    response = api_client.post("/users/logout/all/")
+    assert response.status_code == 200
+    # And, now when tried to login again it should be ok!
+    response = api_client.post(
+        "/rest-auth/login/",
+        {
+            "username": "dummy1@dispostable.com",
+            "password": "testuser1234_",
+        },
+        format="json",
+    )
+    assert response.status_code == 200
